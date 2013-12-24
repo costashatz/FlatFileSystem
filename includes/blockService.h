@@ -136,19 +136,19 @@ public:
 		close(fp);
 	}
 	
-	int ReadBlock(unsigned int pos, void* data) // öÝñíåé áðü ôï äßóêï Ýíá block (ìáò åíäéáöÝñïõí ìüíï ôá blocks ãéá ôá áñ÷åßá ïðüôå ìðáßíåé Ýíá offset óôçí pos)
+	int ReadBlock(unsigned int pos, void* data) // reads block from disk to memory
 	{
 		int fp,t;
 		fp = open(device, O_RDONLY);
 		if(fp<0)
 			return -1;
-		t = lseek(fp,(657+pos-1)*blockSize,SEEK_SET); // seek óôç èÝóç ôïõ block ðïõ æçôåßôáé
+		t = lseek(fp,(657+pos-1)*blockSize,SEEK_SET); // seek block's position
 		if(t<0)
 		{
 			close(fp);
 			return -1;
 		}
-		t = read(fp,data,blockSize); // áíÜãíùóç äåäïìÝíùí
+		t = read(fp,data,blockSize); // read data
 		if(t<0)
 		{
 			close(fp);
@@ -158,7 +158,7 @@ public:
 		return 0;
 	}
 	
-	int WriteBlock(unsigned int pos, void* data) // ãñÜöåé óôï äßóêï Ýíá block (ìáò åíäéáöÝñïõí ìüíï ôá blocks ãéá ôá áñ÷åßá ïðüôå ìðáßíåé Ýíá offset óôçí pos)
+	int WriteBlock(unsigned int pos, void* data) // writes block to disk
 	{
 		if(data)
 		{
@@ -166,13 +166,13 @@ public:
 			fp = open(device, O_WRONLY);
 			if(fp<0)
 				return -1;
-			t = lseek(fp,(657+pos-1)*blockSize,SEEK_SET); // seek óôç èÝóç ôïõ block ðïõ æçôåßôáé
+			t = lseek(fp,(657+pos-1)*blockSize,SEEK_SET); // seek to block's position
 			if(t<0)
 			{
 				close(fp);
 				return -1;
 			}
-			t = write(fp,data,blockSize); // åããñáöÞ äåäïìÝíùí
+			t = write(fp,data,blockSize); // write data
 			if(t<0)
 			{
 				close(fp);
@@ -184,11 +184,11 @@ public:
 		return -1;
 	}
 	
-	int AllocateBlock(unsigned int& pos) // äÝóìåõóç åíüò block (ìáò åíäéáöÝñïõí ìüíï ôá blocks ãéá ôá áñ÷åßá ïðüôå ìðáßíåé Ýíá offset óôçí pos)
+	int AllocateBlock(unsigned int& pos) // block Allocation
 	{
 		for(unsigned int i=0;i<blockBM.size();i++)
 		{
-			if(blockBM[i] == 0) // äåóìåýïõìå ôï ðñþôï åëåýèåñï
+			if(blockBM[i] == 0) // allocate the first free block
 			{
 				blockBM[i] = 1;
 				pos = i+1;
@@ -198,9 +198,9 @@ public:
 		return -1;
 	}
 	
-	int FreeBlock(unsigned int pos) // áðïäÝóìåõóç åíüò block (ìáò åíäéáöÝñïõí ìüíï ôá blocks ãéá ôá áñ÷åßá ïðüôå ìðáßíåé Ýíá offset óôçí pos)
+	int FreeBlock(unsigned int pos) // Free block
 	{
-		if(pos<=blockBM.size()&&pos>0) // Ýëåã÷ïò ãéá valid pos
+		if(pos<=blockBM.size()&&pos>0) // check valid params
 		{
 			blockBM[pos-1] = 0;
 			return 0;
@@ -208,7 +208,7 @@ public:
 		return -1;
 	}
 	
-	int getiNode(unsigned int index, iNode* inode) // öÝñíåé áðü ôï äßóêï Ýíá iNode
+	int getiNode(unsigned int index, iNode* inode) // read iNode from disk
 	{
 		int fp,t;
 		if(inodesBM[index-1]==0)
@@ -216,13 +216,13 @@ public:
 		fp = open(device, O_RDONLY);
 		if(fp<0)
 			return -1;
-		t = lseek(fp,17*blockSize+(index-1)*sizeof(iNode),SEEK_SET); // seek óôç èÝóç ôïõ iNode ðïõ æçôåßôáé
+		t = lseek(fp,17*blockSize+(index-1)*sizeof(iNode),SEEK_SET); // seek to iNode's position
 		if(t<0)
 		{
 			close(fp);
 			return -1;
 		}
-		t = read(fp,inode,sizeof(iNode)); // áíÜãíùóç äåäïìÝíùí
+		t = read(fp,inode,sizeof(iNode)); // read data
 		if(t<0)
 		{
 			close(fp);
@@ -232,7 +232,7 @@ public:
 		return 0;
 	}
 	
-	int putiNode(unsigned int index, iNode* inode) // áðïèçêåýåé óôï äßóêï Ýíá iNode
+	int putiNode(unsigned int index, iNode* inode) // write iNode to disk
 	{
 		int fp,t;
 		if(inodesBM[index-1]==0)
@@ -240,13 +240,13 @@ public:
 		fp = open(device, O_WRONLY);
 		if(fp<0)
 			return -1;
-		t = lseek(fp,17*blockSize+(index-1)*sizeof(iNode),SEEK_SET); // seek óôç èÝóç ôïõ iNode ðïõ æçôåßôáé
+		t = lseek(fp,17*blockSize+(index-1)*sizeof(iNode),SEEK_SET); // seek to iNode's position
 		if(t<0)
 		{
 			close(fp);
 			return -1;
 		}
-		t = write(fp,inode,sizeof(iNode)); // åããñáöÞ äåäïìÝíùí
+		t = write(fp,inode,sizeof(iNode)); // write data
 		if(t<0)
 		{
 			close(fp);
@@ -256,12 +256,12 @@ public:
 		return 0;
 	}
 	
-	int AllocateiNode() // äÝóìåõóç åíüò iNode
+	int AllocateiNode() // iNode allocation
 	{
 		int i;
 		for(i=0;i<inodesNum;i++)
 		{
-			if(inodesBM[i] == 0) // äåóìåýïõìå ôï ðñþôï åëåýèåñï
+			if(inodesBM[i] == 0) // allocate the first free iNode
 			{
 				break;
 			}
@@ -269,7 +269,7 @@ public:
 		if(i>= inodesNum)
 			return -1;
 		inodesBM[i] = 1;
-		// áñ÷éêïðïßçóç ôïõ iNode
+		// initialize iNode
 		iNode* inode = new iNode;
 		inode->size=0;
 		for(int j=0;j<15;j++) inode->indices[j] = 0;
@@ -277,9 +277,9 @@ public:
 		return i+1;
 	}
 	
-	int DeAllocateiNode(unsigned int index) // áðïäÝóìåõóç åíüò iNode
+	int DeAllocateiNode(unsigned int index) // deallocation of iNode
 	{
-		if(index<=0||index>inodesNum) // Ýëåã÷ïò ãéá valid index
+		if(index<=0||index>inodesNum) // check valid index
 			return -1;
 		inodesBM[index-1] = 0;
 		return 0;
