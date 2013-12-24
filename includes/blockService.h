@@ -104,12 +104,11 @@ public:
 		close(fp);
 	}
 	
-	void WrapUp() //ÁðïèÞêåõóç áëëáãìÝíùí ôéìþí ðßóù óôï system file (üôáí êÜíïõìå unmount)
+	void WrapUp() //Unmount File System
 	{
 		int fp;
 		fp = open(device, O_WRONLY);
 		lseek(fp,blockSize,SEEK_SET); //seek to inodes bit map start block
-		// áðïèÞêåõóç óôï system file ôïõ inodes bit map
 		for(unsigned int i=0;i<inodesBMSize;i++)
 		{
 			char x = 0;
@@ -120,7 +119,6 @@ public:
 			write(fp,&x,1);
 		}
 		lseek(fp,2*blockSize,SEEK_SET); //seek to blocks bit map start block
-		// áðïèÞêåõóç óôï system file ôïõ blocks bit map
 		for(unsigned int i=0;i<blockBMSize;i++)
 		{
 			char x = 0;
@@ -131,7 +129,6 @@ public:
 			write(fp,&x,1);
 		}
 		lseek(fp,529*blockSize,SEEK_SET); //seek to directory table's start block
-		// áðïèÞêåõóç óôï system file ôïõ directory table
 		write(fp,dirTable,dirTableSize);
 		close(fp);
 	}
